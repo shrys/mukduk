@@ -14,6 +14,7 @@
         address public manager;
         uint public minimumContributuion;
         mapping (address=>bool) public approvers;
+        uint public approversCount;
 
         modifier restricted() {
             require(msg.sender == manager);
@@ -29,6 +30,7 @@
             require(msg.value > minimumContributuion);
             
             approvers[msg.sender] = true;
+            approversCount++;
         }
 
         function createRequest(string description, uint value, address recipient)
@@ -47,5 +49,15 @@
             
             request.apporvals[msg.sender] = true;
             request.approvalCount++;
+        }
+
+        function finalizeRequest(uint index) public restricted {
+            Request storage request = requests[index];
+
+            require(request.approvalCount > (approversCount/2));
+            require(!request.complete);
+
+            request.recipient.transfer(request.value);
+            request.complete = true;
         }
     }
