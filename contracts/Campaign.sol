@@ -11,7 +11,7 @@
         Request[] public requests;
         address public manager;
         uint public minimumContributuion;
-        address[] public approvers;
+        mapping (address=>bool) public approvers;
 
         modifier restricted() {
             require(msg.sender == manager);
@@ -26,11 +26,12 @@
         function contribute() public payable {
             require(msg.value > minimumContributuion);
             
-            approvers.push(msg.sender);
+            approvers[msg.sender] = true;
         }
 
         function createRequest(string description, uint value, address recipient)
         public restricted {
+            // require(approvers[msg.sender]);
             Request memory newRequest = Request(description, value, recipient, false);
 
             requests.push(newRequest);
